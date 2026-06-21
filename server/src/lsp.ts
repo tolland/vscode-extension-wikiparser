@@ -35,6 +35,7 @@ import type {
 	SignatureHelp,
 	InlayHintParams,
 	InlayHint,
+	DocumentHighlight,
 } from 'vscode-languageserver/node';
 import type {LanguageService, Config} from 'wikilint';
 
@@ -220,6 +221,15 @@ export const provideSignatureHelp = (
 ): Promise<SignatureHelp | undefined> => {
 	const [doc, lsp] = getLSP(uri);
 	return lsp.provideSignatureHelp(doc, position);
+};
+
+export const provideDocumentHighlight = async (
+	{textDocument: {uri}, position}: TextDocumentPositionParams,
+): Promise<DocumentHighlight[]> => {
+	const [doc, lsp] = getLSP(uri);
+	// LanguageService may implement provideDocumentHighlights(doc, position)
+	const highlights = await (lsp as any).provideDocumentHighlights?.(doc, position);
+	return (highlights ?? []) as DocumentHighlight[];
 };
 
 export const provideInlayHints = ({textDocument: {uri}}: InlayHintParams): Promise<InlayHint[]> => {
